@@ -1,0 +1,895 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin name="Profile Songs" version_long="10001" version_human="1.0.1" author="Seth Jones" website="https://hitspark.io" update_check=""><hooks><hook type="S" class="\IPS\Theme\class_core_front_profile" filename="profilesong"><![CDATA[//<?php
+
+/* To prevent PHP errors (extending class does not exist) revealing path */
+if ( !\defined( '\IPS\SUITE_UNIQUE_KEY' ) )
+{
+	exit;
+}
+
+class hook80 extends _HOOK_CLASS_
+{
+
+/* !Hook Data - DO NOT REMOVE */
+public static function hookData() {
+ return array_merge_recursive( array (
+  'profile' => 
+  array (
+    0 => 
+    array (
+      'selector' => '#elProfileInfoColumn > div.ipsPadding.ipsBox.ipsResponsive_pull',
+      'type' => 'add_inside_start',
+      'content' => '{{if $member->kuzi_song_path}}
+	{{$profileSong = (string) \IPS\File::get(\'core_Profile\', $member->kuzi_song_path)->url;}}
+    {{$autoplay = \IPS\Settings::i()->hitspark_song_autoplay;}}
+    {{$loop = \IPS\Settings::i()->hitspark_song_loop;}}
+	{{$playerWidth = \IPS\Settings::i()->hitspark_player_width;}}
+
+    <div class="ipsWidget ipsWidget_vertical cProfileSidebarBlock ipsBox ipsSpacer_bottom" data-location="defaultFields">
+    	<h2 class="ipsWidget_title ipsType_reset">Profile Song</h2>
+      		<div class="ipsWidget_inner ipsPad">
+				{{if $autoplay && $loop}}
+					<audio autoplay controls="" loop class="ps_audio" style="width: {$playerWidth}px;"><source src="{$profileSong}"></audio>
+				{{endif}}
+
+				{{if $autoplay && !$loop}}
+					<audio autoplay controls="" class="ps_audio" style="width: {$playerWidth}px;"><source src="{$profileSong}"></audio>
+				{{endif}}
+
+				{{if !$autoplay && !$loop}}
+					<audio controls="" class="ps_audio" style="width: {$playerWidth}px;"><source src="{$profileSong}"></audio>
+				{{endif}}
+      		</div>
+    </div>
+{{endif}}',
+    ),
+  ),
+  'profileHeader' => 
+  array (
+    0 => 
+    array (
+      'selector' => '#elEditProfile',
+      'type' => 'add_inside_end',
+      'content' => '{{$profileSong = $member->profileSong();}}
+{{if $profileSong->editable}}
+  <li>
+    <a href=\'#ps_menu\' data-hideOnPbgEdit class=\'ipsButton ipsButton_small ipsButton_overlaid\' data-ipsMenu id=\'elEditPs\' data-role=\'psOptions\'>
+      <i class=\'fa fa-music\'></i> <span class=\'ipsResponsive_hidePhone ipsResponsive_inline\'>  {lang=\'ps_header_title\'} <i class=\'fa fa-caret-down\'></i></span>
+    </a>
+    <ul class=\'ipsMenu ipsMenu_auto ipsHide\' id=\'elEditPs_menu\'>
+      {{if $profileSong->file}}
+        <li class=\'ipsMenu_item\' data-role="psOption">
+          <a href=\'{$member->url()->setQueryString( \'do\', \'profileSongRemove\' )->csrf()}\' data-action=\'removeProfileSong\'>{lang=\'ps_remove_song\'}</a>
+        </li>
+      {{endif}}
+      <li class=\'ipsMenu_item\'>
+        <a href=\'{$member->url()->setQueryString( \'do\', \'profileSongUpload\' )}\' data-ipsDialog data-ipsDialog-title="Upload Song">{lang=\'ps_upload_song\'}</a>
+      </li>
+    </ul>
+  </li>
+{{endif}}
+',
+    ),
+  ),
+), parent::hookData() );
+}
+/* End Hook Data */
+
+
+}
+]]></hook><hook type="C" class="\IPS\Member" filename="8d59e5e4474b6c4743c313ee4e0ed35c"><![CDATA[//<?php
+
+/* To prevent PHP errors (extending class does not exist) revealing path */
+if ( !\defined( '\IPS\SUITE_UNIQUE_KEY' ) )
+{
+	exit;
+}
+
+class hook81 extends _HOOK_CLASS_
+{
+   /**
+	 * Profile Song
+	 *
+	 * @return \IPS\Helpers\CoverPhoto
+	 */
+	public function profileSong()
+	{
+		try
+		{
+			try
+			{
+				try
+				{
+					try
+					{
+						try
+						{
+							try
+							{
+								try
+								{
+									try
+									{
+										try
+										{
+											$song = new \IPS\Helpers\CoverPhoto();
+												
+									        if ($this->kuzi_song_path)
+									        {
+									            $song->file = \IPS\File::get('core_Profile', $this->kuzi_song_path);
+									        }
+									
+									        $allowedGroups = \IPS\Settings::i()->ps_song_groups;
+									        $ownerAndInGroup = (
+									            \IPS\Member::loggedIn()->member_id == $this->member_id
+									            &&
+									            (
+									                $allowedGroups === 'all'
+									                || \IPS\Member::loggedIn()->inGroup(explode(',', $allowedGroups))
+									            )
+									        );
+									        $song->editable = (
+									            \IPS\Member::loggedIn()->modPermission('can_modify_profiles')
+									            || $ownerAndInGroup
+									        );
+									        if ($this->inGroup(explode(',', $allowedGroups))) {
+									        $song->viewable = 'all';
+									        
+									        $song->maxSize = \IPS\Settings::i()->hitspark_song_max_size;
+									        }
+									
+									        return $song;
+										}
+										catch ( \RuntimeException $e )
+										{
+											if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+											{
+												return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+											}
+											else
+											{
+												throw $e;
+											}
+										}
+									}
+									catch ( \RuntimeException $e )
+									{
+										if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+										{
+											return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+										}
+										else
+										{
+											throw $e;
+										}
+									}
+								}
+								catch ( \RuntimeException $e )
+								{
+									if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+									{
+										return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+									}
+									else
+									{
+										throw $e;
+									}
+								}
+							}
+							catch ( \RuntimeException $e )
+							{
+								if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+								{
+									return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+								}
+								else
+								{
+									throw $e;
+								}
+							}
+						}
+						catch ( \RuntimeException $e )
+						{
+							if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+							{
+								return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+							}
+							else
+							{
+								throw $e;
+							}
+						}
+					}
+					catch ( \RuntimeException $e )
+					{
+						if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+						{
+							return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+						}
+						else
+						{
+							throw $e;
+						}
+					}
+				}
+				catch ( \RuntimeException $e )
+				{
+					if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+					{
+						return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+					}
+					else
+					{
+						throw $e;
+					}
+				}
+			}
+			catch ( \RuntimeException $e )
+			{
+				if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+				{
+					return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+				}
+				else
+				{
+					throw $e;
+				}
+			}
+		}
+		catch ( \RuntimeException $e )
+		{
+			if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+			{
+				return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+			}
+			else
+			{
+				throw $e;
+			}
+		}
+	}
+}
+]]></hook><hook type="C" class="\IPS\core\modules\front\members\profile" filename="profileSongsByDawPi"><![CDATA[//<?php
+
+/* To prevent PHP errors (extending class does not exist) revealing path */
+if ( !\defined( '\IPS\SUITE_UNIQUE_KEY' ) )
+{
+	exit;
+}
+
+class hook82 extends _HOOK_CLASS_
+{
+  /**
+	 * Upload Profile Song
+	 *
+	 * @return	void
+	 */
+	protected function profileSongUpload()
+	{
+		try
+		{
+			try
+			{
+				try
+				{
+					try
+					{
+						try
+						{
+							try
+							{
+								try
+								{
+									try
+									{
+										try
+										{
+									        $song = $this->_profileSongGet();
+									        if (!$song->editable)
+									        {
+									            \IPS\Output::i()->error( 'no_module_permission', '2S216/1', 403, '' );
+									        }
+									
+									        $form = new \IPS\Helpers\Form('profileSong');
+									        $form->class = 'ipsForm_vertical ipsForm_noLabels';
+											$song->maxSize = \IPS\Settings::i()->hitspark_song_max_size;
+									
+									        $songFileUpload =  new \IPS\Helpers\Form\Upload('profile_song', NULL, FALSE, array( 'image' => NULL, 'minimize' => TRUE, 'maxFileSize' => ($song->maxSize and $song->maxSize != -1) ? $song->maxSize / 1024 : NULL, 'storageExtension' => $this->_coverPhotoStorageExtension(), 'allowedFileTypes' => array('mp3', 'ogg', 'wav')));
+									
+									        $form->add($songFileUpload);
+									        $form->add(new \IPS\Helpers\Form\Url('profile_song_url', NULL, FALSE, array(
+									            'placeholder' => \IPS\Member::loggedIn()->language()->get( 'ps_form_use_url' ),
+									            'allowedMimes' => [
+									                'audio/mpeg',
+									                'audio/mpeg3',
+									                'audio/x-mpeg-3',
+									                'video/mpeg',
+									                'video/x-mpeg',
+									                'audio/wav',
+									                'audio/x-wav',
+									                'application/ogg',
+									                'audio/ogg'
+									            ],
+									            'maxFileSize' => ($song->maxSize and $song->maxSize != -1) ? $song->maxSize / 1024 : NULL,
+									            'storageExtension' => $this->_coverPhotoStorageExtension(),
+									            'file' => $this->_coverPhotoStorageExtension()
+									        ) ) );
+									        if ($values = $form->values())
+									        {
+									            $songLocation = $values['profile_song'] ?: $values['profile_song_url'];
+									
+									            if (empty($songLocation)) {
+									                $songFileUpload->error = \IPS\Member::loggedIn()->language()->get( 'ps_form_not_empty' );
+									            } else {
+									                try
+									                {
+									                    $song->delete();
+									                }
+									                catch ( \Exception $e ) { }
+									
+									                $this->_profileSongSet( new \IPS\Helpers\CoverPhoto($songLocation, 0 ));
+									                \IPS\Output::i()->redirect($_SERVER['HTTP_REFERER']);
+									            }
+									        }
+									
+									        \IPS\Output::i()->output = $form->customTemplate( array( \IPS\Theme::i()->getTemplate( 'forms', 'core' ), 'popupTemplate' ) );
+										}
+										catch ( \RuntimeException $e )
+										{
+											if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+											{
+												return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+											}
+											else
+											{
+												throw $e;
+											}
+										}
+									}
+									catch ( \RuntimeException $e )
+									{
+										if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+										{
+											return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+										}
+										else
+										{
+											throw $e;
+										}
+									}
+								}
+								catch ( \RuntimeException $e )
+								{
+									if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+									{
+										return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+									}
+									else
+									{
+										throw $e;
+									}
+								}
+							}
+							catch ( \RuntimeException $e )
+							{
+								if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+								{
+									return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+								}
+								else
+								{
+									throw $e;
+								}
+							}
+						}
+						catch ( \RuntimeException $e )
+						{
+							if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+							{
+								return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+							}
+							else
+							{
+								throw $e;
+							}
+						}
+					}
+					catch ( \RuntimeException $e )
+					{
+						if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+						{
+							return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+						}
+						else
+						{
+							throw $e;
+						}
+					}
+				}
+				catch ( \RuntimeException $e )
+				{
+					if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+					{
+						return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+					}
+					else
+					{
+						throw $e;
+					}
+				}
+			}
+			catch ( \RuntimeException $e )
+			{
+				if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+				{
+					return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+				}
+				else
+				{
+					throw $e;
+				}
+			}
+		}
+		catch ( \RuntimeException $e )
+		{
+			if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+			{
+				return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+			}
+			else
+			{
+				throw $e;
+			}
+		}
+	}
+
+	/**
+	 * Remove Profile Song
+	 *
+	 * @return	void
+	 */
+	protected function profileSongRemove()
+	{
+		try
+		{
+			try
+			{
+				try
+				{
+					try
+					{
+						try
+						{
+							try
+							{
+								try
+								{
+									try
+									{
+										try
+										{
+											\IPS\Session::i()->csrfCheck();
+									        $song = $this->_profileSongGet();
+									        if (!$song->editable)
+									        {
+									            \IPS\Output::i()->error( 'no_module_permission', '2S216/2', 403, '' );
+									        }
+									
+									        try
+									        {
+									            $song->delete();
+									        }
+									        catch ( \Exception $e ) { }
+									
+									        $this->_profileSongSet( new \IPS\Helpers\CoverPhoto( NULL, 0 ) );
+									        if ( \IPS\Request::i()->isAjax() )
+									        {
+									            \IPS\Output::i()->json( 'OK' );
+									        }
+									        else
+									        {
+									            \IPS\Output::i()->redirect( $_SERVER['HTTP_REFERER'] );
+									        }
+										}
+										catch ( \RuntimeException $e )
+										{
+											if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+											{
+												return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+											}
+											else
+											{
+												throw $e;
+											}
+										}
+									}
+									catch ( \RuntimeException $e )
+									{
+										if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+										{
+											return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+										}
+										else
+										{
+											throw $e;
+										}
+									}
+								}
+								catch ( \RuntimeException $e )
+								{
+									if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+									{
+										return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+									}
+									else
+									{
+										throw $e;
+									}
+								}
+							}
+							catch ( \RuntimeException $e )
+							{
+								if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+								{
+									return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+								}
+								else
+								{
+									throw $e;
+								}
+							}
+						}
+						catch ( \RuntimeException $e )
+						{
+							if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+							{
+								return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+							}
+							else
+							{
+								throw $e;
+							}
+						}
+					}
+					catch ( \RuntimeException $e )
+					{
+						if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+						{
+							return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+						}
+						else
+						{
+							throw $e;
+						}
+					}
+				}
+				catch ( \RuntimeException $e )
+				{
+					if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+					{
+						return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+					}
+					else
+					{
+						throw $e;
+					}
+				}
+			}
+			catch ( \RuntimeException $e )
+			{
+				if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+				{
+					return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+				}
+				else
+				{
+					throw $e;
+				}
+			}
+		}
+		catch ( \RuntimeException $e )
+		{
+			if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+			{
+				return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+			}
+			else
+			{
+				throw $e;
+			}
+		}
+	}
+    
+
+
+	protected function _profileSongSet( \IPS\Helpers\CoverPhoto $song ) 
+    {
+	try
+	{
+		try
+		{
+			try
+			{
+				try
+				{
+					try
+					{
+						try
+						{
+							try
+							{
+								try
+								{
+									try
+									{
+									        $this->member->kuzi_song_path = isset( $song->file ) ? (string) $song->file : NULL;
+									        $this->member->save();
+										}
+										catch ( \RuntimeException $e )
+										{
+											if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+											{
+												return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+											}
+											else
+											{
+												throw $e;
+											}
+										}
+									}
+									catch ( \RuntimeException $e )
+									{
+										if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+										{
+											return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+										}
+										else
+										{
+											throw $e;
+										}
+									}
+								}
+								catch ( \RuntimeException $e )
+								{
+									if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+									{
+										return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+									}
+									else
+									{
+										throw $e;
+									}
+								}
+							}
+							catch ( \RuntimeException $e )
+							{
+								if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+								{
+									return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+								}
+								else
+								{
+									throw $e;
+								}
+							}
+						}
+						catch ( \RuntimeException $e )
+						{
+							if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+							{
+								return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+							}
+							else
+							{
+								throw $e;
+							}
+						}
+					}
+					catch ( \RuntimeException $e )
+					{
+						if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+						{
+							return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+						}
+						else
+						{
+							throw $e;
+						}
+					}
+				}
+				catch ( \RuntimeException $e )
+				{
+					if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+					{
+						return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+					}
+					else
+					{
+						throw $e;
+					}
+				}
+			}
+			catch ( \RuntimeException $e )
+			{
+				if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+				{
+					return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+				}
+				else
+				{
+					throw $e;
+				}
+			}
+		}
+		catch ( \RuntimeException $e )
+		{
+			if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+			{
+				return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+			}
+			else
+			{
+				throw $e;
+			}
+		}
+	}
+
+	protected function _profileSongGet() 
+    {
+	try
+	{
+		try
+		{
+			try
+			{
+				try
+				{
+					try
+					{
+						try
+						{
+							try
+							{
+								try
+								{
+									try
+									{
+									        return $this->member->profileSong();
+										}
+										catch ( \RuntimeException $e )
+										{
+											if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+											{
+												return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+											}
+											else
+											{
+												throw $e;
+											}
+										}
+									}
+									catch ( \RuntimeException $e )
+									{
+										if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+										{
+											return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+										}
+										else
+										{
+											throw $e;
+										}
+									}
+								}
+								catch ( \RuntimeException $e )
+								{
+									if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+									{
+										return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+									}
+									else
+									{
+										throw $e;
+									}
+								}
+							}
+							catch ( \RuntimeException $e )
+							{
+								if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+								{
+									return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+								}
+								else
+								{
+									throw $e;
+								}
+							}
+						}
+						catch ( \RuntimeException $e )
+						{
+							if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+							{
+								return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+							}
+							else
+							{
+								throw $e;
+							}
+						}
+					}
+					catch ( \RuntimeException $e )
+					{
+						if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+						{
+							return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+						}
+						else
+						{
+							throw $e;
+						}
+					}
+				}
+				catch ( \RuntimeException $e )
+				{
+					if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+					{
+						return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+					}
+					else
+					{
+						throw $e;
+					}
+				}
+			}
+			catch ( \RuntimeException $e )
+			{
+				if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+				{
+					return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+				}
+				else
+				{
+					throw $e;
+				}
+			}
+		}
+		catch ( \RuntimeException $e )
+		{
+			if ( method_exists( get_parent_class(), __FUNCTION__ ) )
+			{
+				return \call_user_func_array( 'parent::' . __FUNCTION__, \func_get_args() );
+			}
+			else
+			{
+				throw $e;
+			}
+		}
+	}
+}
+]]></hook></hooks><settings><setting><key>hitspark_song_member_groups</key><default>""</default></setting><setting><key>hitspark_song_autoplay</key><default>1</default></setting><setting><key>hitspark_song_loop</key><default>1</default></setting><setting><key>hitspark_song_max_size</key><default>5120</default></setting><setting><key>hitspark_player_width</key><default>300</default></setting></settings><settingsCode><![CDATA[//<?php
+
+$groups = \IPS\Member\Group::groups();
+
+$form->add( new \IPS\Helpers\Form\Select('hitspark_song_member_groups',
+		\IPS\Settings::i()->hitspark_song_member_groups !== 'all' ? explode( ',', \IPS\Settings::i()->hitspark_song_member_groups ) : 'all',
+		FALSE,
+		array( 	'options' => array_combine( array_keys( $groups ), array_map( function( $_group ) { return (string) $_group; }, $groups ) ),
+			'multiple' => true,
+			'unlimited' => 'all',
+			'unlimitedLang' => 'all_groups'
+		)
+	)
+);
+
+$form->add( new \IPS\Helpers\Form\YesNo( 'hitspark_song_autoplay', \IPS\Settings::i()->hitspark_song_autoplay ) );
+$form->add( new \IPS\Helpers\Form\YesNo( 'hitspark_song_loop', \IPS\Settings::i()->hitspark_song_loop ) );
+$form->add( new \IPS\Helpers\Form\Text( 'hitspark_song_max_size', \IPS\Settings::i()->hitspark_song_max_size ) );
+$form->add( new \IPS\Helpers\Form\Text( 'hitspark_player_width', \IPS\Settings::i()->hitspark_player_width ) );
+
+if ( $values = $form->values() )
+{
+	$form->saveAsSettings();
+	return TRUE;
+}
+
+return $form;
+]]></settingsCode><tasks/><widgets/><htmlFiles/><cssFiles/><jsFiles/><resourcesFiles/><lang><word key="hitspark_song_autoplay" js="0">Autoplay</word><word key="hitspark_song_member_groups" js="0">Member Groups</word><word key="hitspark_song_loop" js="0">Loop</word><word key="hitspark_player_width" js="0">Player Width</word><word key="hitspark_song_max_size" js="0">Max Size</word><word key="ps_profile_title" js="0">Profile Song</word><word key="ps_header_title" js="0">Profile Song</word><word key="ps_remove_song" js="0">Remove Song</word><word key="ps_upload_song" js="0">Upload Song</word><word key="ps_form_not_empty" js="0">Song location can not be empty.</word><word key="ps_form_use_url" js="0">URL (mp3, ogg, wav)</word></lang><versions><version long="10000" human="1.0.0"/></versions></plugin>
